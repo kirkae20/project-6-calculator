@@ -21,7 +21,34 @@ class eCalc extends JFrame implements ActionListener {
     }
 
     public static Integer EvaluatePostFix(String exp) {
-        // FINISH ME
+        Stack<String> postfixStack = new Stack<>();
+        for(int i = 0; i < exp.length(); i++) { // for each element in expression
+            char check = exp.charAt(i);
+            if(Character.isDigit(check)) {      // if digit, push to stack
+                postfixStack.push(String.valueOf(check));
+            }
+            else if ((check == '+') || (check == '-') || (check == '*') || (check == '/')) { // if operator, pop two
+                String item1 = postfixStack.pop();                                           // digits from stack
+                String item2 = postfixStack.pop();
+                if (check == '+'){                                              // if +, add popped digits
+                    int sum = Integer.parseInt(item1) + Integer.parseInt(item2);   // push sum back to stack
+                    postfixStack.push(String.valueOf(sum));
+                }
+                else if (check == '-'){                                             // if -, subtract popped digits
+                    int difference = Integer.parseInt(item2) - Integer.parseInt(item1); // push difference back to stack
+                    postfixStack.push(String.valueOf(difference));
+                }
+                else if (check == '*'){                                             // if *, multiply popped digits
+                    int product = Integer.parseInt(item1) * Integer.parseInt(item2); // push product back to stack
+                    postfixStack.push(String.valueOf(product));
+                }
+                else if (check == '/'){                                             // if /, divide popped digits
+                    int quotient = Integer.parseInt(item2) / Integer.parseInt(item1); // push quotient back to stack
+                    postfixStack.push(String.valueOf(quotient));
+                }
+            }
+        }
+        return Integer.parseInt(postfixStack.pop()); // pop String solution, parse as integer, return integer solution
     }
 
     // A utility function to return the precedence of a given operator
@@ -40,7 +67,41 @@ class eCalc extends JFrame implements ActionListener {
     }
 
     public static String InfixToPostfix(String exp) {
-        // FINISH ME
+        String postfixExp = "";
+        Stack<Character> infixStack = new Stack<>();
+        for(int i = 0; i < exp.length(); i++) { // for each element in expression
+            char check = exp.charAt(i);
+            if (check >= '0' && check <= '9') { // if character is a digit, add digit to String
+                postfixExp += check;
+            } else if (check == '(') { // if character is a left parentheses, push parenthases
+                infixStack.push(check);
+            } else if (check == ')') { // if character is a right parentheses, pop operator and add operator to String
+                while (!infixStack.isEmpty() && infixStack.peek() != '(') { // until left parentheses is reached
+                    postfixExp += infixStack.pop();
+                }
+                if (!infixStack.isEmpty()) {
+                    infixStack.pop();  // pop left parentheses to discard
+                }
+            } else if ((check == '+') || (check == '-') || (check == '*') || (check == '/')) { // if character is
+                if (infixStack.isEmpty()) {                                                      // another operator
+                    infixStack.push(check); // if stack is empty, push operator to stack
+                } else if (!infixStack.isEmpty() && (precedence(infixStack.peek()) < precedence(check))) {
+                    infixStack.push(check); // if stack is not empty and character is higher in precedence than top of
+                }                           // stack, push operator to stack
+                else {
+                    if (!infixStack.isEmpty() && precedence(infixStack.peek()) >= precedence(check)) {
+                        while (infixStack.peek() != '(') { // if stack is not empty and character is equal to or lower
+                            postfixExp += infixStack.pop(); // in precedence than top of stack, if top of stack is not
+                        }                                   // a left parentheses, pop top of stack and add to String
+                        infixStack.push(check); // if stack is not empty and character is either a left parentheses or
+                    }                           // is lower in precedence than top of stack, push operator to stack
+                }
+            }
+        }
+        while(!infixStack.isEmpty()){ // while stack is still not empty
+            postfixExp += infixStack.pop(); // pop each character and add it to String
+        }
+        return postfixExp; // return String
     }
 
     public void actionPerformed(ActionEvent e) {
